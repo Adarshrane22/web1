@@ -1,0 +1,318 @@
+<!--
+README / Instructions (top of file):
+
+1) Replace the placeholder <MY_NUMBER> with your Book Now number in international format (no leading + or 00). Example: 919812345678
+   Replace the placeholder <BRAND_NAME> and <TAGLINE> with your brand name and tagline.
+
+   Search for the strings: REPLACE_MY_NUMBER_HERE and REPLACE_BRAND_NAME_HERE in this file.
+
+2) Image assets are referenced from the local paths you uploaded. If you move the images, update the src paths.
+   Current image paths used (already embedded below):
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.23_268ee171.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.27_ec626381.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.27_7465c60d.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.27_dc77a85c.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.28_723be6da.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.28_4ae6e426.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.29_059283c8.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.29_b773d35e.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.28_b864cf0e.jpg
+   Tattoo/WhatsApp Image 2025-11-23 at 10.18.29_95a6c0db.jpg
+
+3) This single file contains HTML + CSS + JS so you can drop it into a web root and view. If you want separate files, I can split them.
+
+4) Book Now behavior: clicking an image opens a new tab/window to the wa.me url with a pre-filled message. Make sure your deployed site is allowed to open wa.me links.
+
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>REPLACE_BRAND_NAME_HERE — Tattoo Portfolio</title>
+  <meta name="description" content="Tattoo portfolio — click any design to contact via Book Now" />
+
+  <style>
+    /* Basic reset */
+    :root{
+      --bg:#f6f3ef; /* warm sand */
+      --card:#ffffff;
+      --muted:#6b655b;
+      --accent:#2f2a25; /* charcoal */
+      --accent-2:#7a6f5f; /* olive-ish */
+      --radius:14px;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--accent)}
+    a{color:inherit;text-decoration:none}
+
+    /* Header / Hero */
+    header{min-height:60vh;display:flex;align-items:center;justify-content:center;padding:48px 20px;background:linear-gradient(180deg, rgba(47,42,37,0.12), rgba(246,243,239,0.0)), url('Tattoo/WhatsApp Image 2025-11-23 at 10.18.23_268ee171.jpg') center/cover no-repeat;}
+    .hero-inner{max-width:1100px;width:100%;display:grid;grid-template-columns:1fr;gap:20px;align-items:center}
+    .brand{font-size:clamp(24px,4vw,36px);letter-spacing:1px;font-weight:700}
+    .tag{font-size:clamp(14px,2vw,18px);color:var(--muted);margin-top:6px}
+    .hero-ctas{margin-top:18px}
+    .btn{display:inline-block;padding:10px 18px;border-radius:999px;background:var(--accent);color:#fff;font-weight:600}
+
+    /* Gallery */
+    main{max-width:1200px;margin:40px auto;padding:0 18px}
+    .section-title{font-weight:700;font-size:18px;margin-bottom:12px}
+    .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .tile{background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 6px 20px rgba(47,42,37,0.06);display:flex;flex-direction:column}
+    .tile img{width:100%;height:320px;object-fit:contain;background:#fff;display:block}
+    .tile .meta{padding:12px 14px;border-top:1px solid rgba(47,42,37,0.04);display:flex;align-items:center;justify-content:space-between}
+    .title-small{font-weight:600}
+    .enquire{font-size:13px;padding:8px 12px;border-radius:8px;background:var(--accent-2);color:#fff}
+
+    /* About + Map */
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(47,42,37,0.04)}
+    .about img{width:120px;height:120px;object-fit:cover;border-radius:8px;margin-right:12px}
+
+    /* Floating whatsapp button */
+    .wa-float{position:fixed;right:18px;bottom:18px;background:#25D366;color:#fff;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.18);z-index:200}
+    .wa-float img{width:26px;height:26px}
+
+    /* Lightbox */
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:300}
+    .lightbox.open{display:flex}
+    .lightbox-content{max-width:980px;width:100%;background:#fff;border-radius:12px;overflow:hidden}
+    .lightbox-content img{width:100%;height:auto;display:block}
+    .lightbox-footer{padding:12px;display:flex;justify-content:space-between;align-items:center}
+
+    /* Responsive */
+    @media (max-width:900px){.gallery{grid-template-columns:repeat(2,1fr)}.tile img{height:260px}.split{grid-template-columns:1fr}}
+    @media (max-width:560px){header{min-height:56vh;padding:28px 12px}.gallery{grid-template-columns:1fr}.tile img{height:220px}.brand{font-size:28px}}
+
+    /* subtle hover */
+    .tile:hover{transform:translateY(-4px);transition:transform .25s}
+  </style>
+</head>
+<body>
+
+  
+
+  <main>
+    <section>
+      <h2 class="section-title">Selected Designs</h2>
+      <div class="gallery" id="gallery">
+
+        <!-- Tile 1 -->
+        <article class="tile" data-title="Sun & Waves">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.23_268ee171.jpg" alt="sun rising over stylized waves tattoo"/>
+          <div class="meta">
+            <div class="title-small">Sun & Waves</div>
+            <button class="enquire" data-title="Sun & Waves">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 2 -->
+        <article class="tile" data-title="Peony / Flower">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.27_ec626381.jpg" alt="peony linework tattoo"/>
+          <div class="meta">
+            <div class="title-small">Peony / Flower</div>
+            <button class="enquire" data-title="Peony / Flower">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 3 -->
+        <article class="tile" data-title="Lotus Line">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.27_7465c60d.jpg" alt="lotus floral line tattoo"/>
+          <div class="meta">
+            <div class="title-small">Lotus Line</div>
+            <button class="enquire" data-title="Lotus Line">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 4 -->
+        <article class="tile" data-title="Surfboard & Shells">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.27_dc77a85c.jpg" alt="surfboard and shells tattoo composition"/>
+          <div class="meta">
+            <div class="title-small">Surfboard & Shells</div>
+            <button class="enquire" data-title="Surfboard & Shells">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 5 -->
+        <article class="tile" data-title="Jellyfish">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.28_723be6da.jpg" alt="jellyfish blackwork tattoo"/>
+          <div class="meta">
+            <div class="title-small">Jellyfish</div>
+            <button class="enquire" data-title="Jellyfish">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 6 -->
+        <article class="tile" data-title="Mushroom Cluster">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.28_4ae6e426.jpg" alt="mushrooms botanical tattoo"/>
+          <div class="meta">
+            <div class="title-small">Mushroom Cluster</div>
+            <button class="enquire" data-title="Mushroom Cluster">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 7 -->
+        <article class="tile" data-title="Dolphin Tribal">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.29_059283c8.jpg" alt="dolphin tribal tattoo"/>
+          <div class="meta">
+            <div class="title-small">Dolphin Tribal</div>
+            <button class="enquire" data-title="Dolphin Tribal">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 8 -->
+        <article class="tile" data-title="Abstract Mushroom">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.29_b773d35e.jpg" alt="abstract mushroom tattoo"/>
+          <div class="meta">
+            <div class="title-small">Abstract Mushroom</div>
+            <button class="enquire" data-title="Abstract Mushroom">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 9 -->
+        <article class="tile" data-title="Dragonfly Mandala">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.28_b864cf0e.jpg" alt="dragonfly with geometric background tattoo"/>
+          <div class="meta">
+            <div class="title-small">Dragonfly Mandala</div>
+            <button class="enquire" data-title="Dragonfly Mandala">Book Now</button>
+          </div>
+        </article>
+
+        <!-- Tile 10 -->
+        <article class="tile" data-title="Starfish & Florals">
+          <img loading="lazy" src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.29_95a6c0db.jpg" alt="starfish with floral elements tattoo"/>
+          <div class="meta">
+            <div class="title-small">Starfish & Florals</div>
+            <button class="enquire" data-title="Starfish & Florals">Book Now</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="split">
+      <div class="card about">
+        <h3>About the Artist</h3>
+        <div style="display:flex;align-items:flex-start;margin-top:12px">
+          <img src="Tattoo/WhatsApp Image 2025-11-23 at 10.18.23_268ee171.jpg" alt="artist portrait placeholder"/>
+          <div>
+            <p style="margin:0;color:var(--muted)">I’m a tattoo artist specializing in blackwork, botanical and minimal custom designs. I focus on clean lines and timeless compositions — consultations are by appointment. For pricing and bookings, click any design below to contact me on Book Now.</p>
+            <p style="margin-top:12px;font-size:14px">Studio: Gokarna-inspired — Clean, sterilized environment. Walk-ins welcome by appointment.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card map">
+        <h3>Location</h3>
+        <p style="color:var(--muted)">Studio address — replace with your address</p>
+        <div style="margin-top:12px;aspect-ratio:16/9;overflow:hidden;border-radius:10px">
+          <!-- Replace the src below with your Google Maps embed URL if needed -->
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15553.495909553975!2d74.3125528!3d14.5507223!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bbe5bf966f6636f%3A0x32d2bacaf07e753c!2sGokarna%20Beach!5e0!3m2!1sen!2sin!4v1700000000000"
+            width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Book Now button (uses placeholder number) -->
+  <a class="wa-float" id="float-wa" href="#" aria-label="Contact via Book Now">
+    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ffffff' d='M20.5 3.5A11 11 0 105.2 20.9L3 21.9l1-2.3A11 11 0 0020.5 3.5zM12 19a7 7 0 110-14 7 7 0 010 14z'/></svg>" alt="whatsapp"/>
+  </a>
+
+  <!-- Lightbox markup -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+      <img id="lightbox-img" src="" alt=""/>
+      <div class="lightbox-footer">
+        <div id="lightbox-title">Title</div>
+        <div>
+          <a id="lightbox-wa" class="enquire" href="#">Contact on Book Now</a>
+          <button id="lightbox-close" style="margin-left:8px;padding:8px 12px;border-radius:8px;background:transparent;border:1px solid rgba(47,42,37,0.06)">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration: replace REPLACE_MY_NUMBER_HERE with your international number (no +)
+    const WA_NUMBER = 'REPLACE_MY_NUMBER_HERE';
+
+    // Utility: create wa.me url with encoded message
+    function whatsappUrl(number, title){
+      if(!number || number.includes('REPLACE')){
+        // open placeholder chat to allow user to edit number manually
+        return '#';
+      }
+      const msg = `Hi, I\'m interested in this tattoo: "${title}". Please share pricing/availability and a consultation time.`;
+      const encoded = encodeURIComponent(msg);
+      return `https://wa.me/${number}?text=${encoded}`;
+    }
+
+    // Wire hero CTA
+    document.getElementById('hero-wa').addEventListener('click', function(e){
+      e.preventDefault();
+      const url = whatsappUrl(WA_NUMBER, 'general booking');
+      if(url === '#'){
+        alert('Please replace the placeholder phone number in the code with your Book Now number in international format.');
+      } else window.open(url, '_blank');
+    });
+
+    // Floating button
+    document.getElementById('float-wa').addEventListener('click', function(e){
+      e.preventDefault();
+      const url = whatsappUrl(WA_NUMBER, 'general booking');
+      if(url === '#'){
+        alert('Please replace the placeholder phone number in the code with your Book Now number in international format.');
+      } else window.open(url, '_blank');
+    });
+
+    // Gallery: open lightbox and whatsapp from tiles
+    const gallery = document.getElementById('gallery');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const lbTitle = document.getElementById('lightbox-title');
+    const lbWa = document.getElementById('lightbox-wa');
+    const lbClose = document.getElementById('lightbox-close');
+
+    gallery.addEventListener('click', (ev)=>{
+      const btn = ev.target.closest('.enquire');
+      const tile = ev.target.closest('.tile');
+      if(btn && btn.dataset && btn.dataset.title){
+        // whatsapp from tile
+        const title = btn.dataset.title;
+        const url = whatsappUrl(WA_NUMBER, title);
+        if(url === '#'){
+          alert('Please replace the placeholder phone number in the code with your Book Now number in international format.');
+        } else window.open(url, '_blank');
+        return;
+      }
+      if(tile){
+        const img = tile.querySelector('img');
+        const title = tile.dataset.title || tile.querySelector('.title-small')?.innerText || 'Tattoo';
+        lbImg.src = img.src;
+        lbImg.alt = img.alt || title;
+        lbTitle.textContent = title;
+        lbWa.href = whatsappUrl(WA_NUMBER, title);
+        lightbox.classList.add('open');
+      }
+    });
+
+    lbClose.addEventListener('click', ()=>{ lightbox.classList.remove('open'); });
+    lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) lightbox.classList.remove('open'); });
+
+    // If a user clicks the lightbox wa button but number is placeholder, warn
+    lbWa.addEventListener('click', function(e){ if(this.href === '#'){ e.preventDefault(); alert('Please replace the placeholder phone number in the code with your Book Now number in international format.'); }});
+
+    // Small enhancement: keyboard close
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') lightbox.classList.remove('open'); });
+
+  </script>
+
+  <!-- Notes: Search for the strings REPLACE_MY_NUMBER_HERE and REPLACE_BRAND_NAME_HERE to update the file. -->
+
+</body>
+</html>
